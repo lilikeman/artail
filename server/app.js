@@ -19,7 +19,8 @@ const db = new sqlite3.Database(
     }
 );
 app.get('/', async (req, res) => {
-
+    await initializeDatabase();
+    res.send("data reset");
 })
 
 
@@ -78,9 +79,9 @@ app.get('/users/search', async (req, res) => {
         const { keyword, type = 'both' } = req.query;
 
         try {
-            let whereClause = 'WHERE isDeleted = false AND (userId = ? OR nickname = ?)'; 
+            let whereClause = 'WHERE isDeleted = false AND (userId = ? OR nickname = ?)';
             let params = [keyword, keyword];
-    
+
             const query = `
                 SELECT 
                     userId, 
@@ -92,7 +93,7 @@ app.get('/users/search', async (req, res) => {
                 FROM Users
                 ${whereClause}
             `;
-    
+
             const users = await getAllQuery(db, query, params);
             res.json({ status: 200, data: { users } });
         } catch (error) {
@@ -104,19 +105,18 @@ app.get('/users/search', async (req, res) => {
 // 사용자 삭제 API
 app.delete('/users/:userId', async (req, res) => {
     const { userId } = req.params;
-    
     try {
 
-      await runQuery(db,`
+        await runQuery(db, `
         UPDATE Users
         SET isDeleted = true, updatedAt = CURRENT_TIMESTAMP
         WHERE userId = ?
       `, [userId])
-      res.json({ status: 200, message: 'User successfully deleted' });
+        res.json({ status: 200, message: 'User successfully deleted' });
     } catch (error) {
-      res.status(500).json({ status: 500, message: error.message });
+        res.status(500).json({ status: 500, message: error.message });
     }
-  });
+});
 
 // XLSX 파일 데이터 처리 및 검증 함수
 function processXlsxData(workbook) {
@@ -143,7 +143,6 @@ function processXlsxData(workbook) {
 
     return validatedData;
 }
-
 
 // XLSX 파일 to SQLite 변환
 async function initializeDatabase() {
@@ -251,11 +250,6 @@ async function initializeDatabase() {
     }
 }
 
-
-
-
-
-
 // 쿼리 실행을 위한 유틸리티 함수
 function runQuery(db, query, params = []) {
     return new Promise((resolve, reject) => {
@@ -265,7 +259,6 @@ function runQuery(db, query, params = []) {
         });
     });
 }
-
 // 데이터 조회를 위한 유틸리티 함수
 function getAllQuery(db, query, params = []) {
     return new Promise((resolve, reject) => {
