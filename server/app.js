@@ -14,7 +14,7 @@ const port = 3000;
 const upload = multer({ dest: 'uploads/' });
 const db = new sqlite3.Database(
     sqliteFilePath,
-    sqlite3.OPEN_READWRITE,
+    sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
     (err) => {
     }
 );
@@ -241,6 +241,7 @@ async function initializeDatabase() {
         }
         // 트랜잭션 커밋
         await runQuery(createDB, 'COMMIT');
+        createDB.close();
         console.log('데이터 추가 성공');
 
     } catch (error) {
