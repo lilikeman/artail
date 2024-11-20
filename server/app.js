@@ -23,19 +23,61 @@ app.get('/', async (req, res) => {
 })
 
 
-// Start the Express server
+//서버 실행
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server is running`);
 });
 
-
+//랭킹 조회 API
+app.get('/rankings', async (req, res) => {
+    const { page = 1, limit = 100 } = req.query;
+    const offset = (page - 1) * limit;
+    
+    try {
+        const rankings = await getAllQuery(db, `
+            SELECT 
+                userId, 
+                nickname, 
+                level, 
+                experience,
+                (
+                    SELECT COUNT(*) + 1 
+                    FROM Users u2 
+                    WHERE (u2.level > u1.level OR (u2.level = u1.level AND u2.experience > u1.experience))
+                    AND u2.isDeleted = 0
+                ) as rank
+            FROM Users u1
+            WHERE isDeleted = 0
+            ORDER BY level DESC, experience DESC
+            LIMIT ? OFFSET ?
+        `, [limit, offset]);
+        
+      const totalCount = await getAllQuery(db,`
+        SELECT COUNT(*) as count FROM Users WHERE isDeleted = false
+      `,[]);
+      
+      res.json({
+        status: 200,
+        data: {
+          rankings,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalCount[0].count / limit),
+            totalItems: totalCount[0].count
+          }
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ status: 500, message: error.message });
+    }
+  });
 // XLSX 파일 데이터 처리 및 검증 함수
 function processXlsxData(workbook) {
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(firstSheet);
 
     const validatedData = data.map(row => {
-        // 필수 필드 검증
+        // 필수 필드확인
         if (!row.userId || !row.nickname || !row.level || !row.exp) {
             throw new Error(`Invalid data format: ${JSON.stringify(row)}`);
         }
@@ -56,7 +98,7 @@ function processXlsxData(workbook) {
 }
 
 
-
+// XLSX 파일 to SQLite 변환
 async function initializeDatabase() {
     const createDB = new sqlite3.Database(
         sqliteFilePath,
@@ -121,7 +163,7 @@ async function initializeDatabase() {
     try {
         // 트랜잭션 시작
         await runQuery(createDB, 'BEGIN');
-    
+
         // 데이터 삽입 쿼리
         const insertQuery = `
           INSERT INTO Users (
@@ -138,7 +180,7 @@ async function initializeDatabase() {
             experience = excluded.experience,
             updatedAt = excluded.updatedAt
         `;
-    
+
         // 데이터 삽입
         for (const user of usersData) {
             await runQuery(createDB, insertQuery, [
@@ -161,6 +203,7 @@ async function initializeDatabase() {
         console.error('Error occurred:', error);
     }
 }
+
 
 
 
