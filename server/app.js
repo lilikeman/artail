@@ -32,7 +32,7 @@ app.listen(port, () => {
 app.get('/rankings', async (req, res) => {
     const { page = 1, limit = 100 } = req.query;
     const offset = (page - 1) * limit;
-    
+
     try {
         const rankings = await getAllQuery(db, `
             SELECT 
@@ -51,26 +51,56 @@ app.get('/rankings', async (req, res) => {
             ORDER BY level DESC, experience DESC
             LIMIT ? OFFSET ?
         `, [limit, offset]);
-        
-      const totalCount = await getAllQuery(db,`
+
+        const totalCount = await getAllQuery(db, `
         SELECT COUNT(*) as count FROM Users WHERE isDeleted = false
-      `,[]);
-      
-      res.json({
-        status: 200,
-        data: {
-          rankings,
-          pagination: {
-            currentPage: parseInt(page),
-            totalPages: Math.ceil(totalCount[0].count / limit),
-            totalItems: totalCount[0].count
-          }
-        }
-      });
+      `, []);
+
+        res.json({
+            status: 200,
+            data: {
+                rankings,
+                pagination: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(totalCount[0].count / limit),
+                    totalItems: totalCount[0].count
+                }
+            }
+        });
     } catch (error) {
-      res.status(500).json({ status: 500, message: error.message });
+        res.status(500).json({ status: 500, message: error.message });
     }
-  });
+});
+
+//키워드 검색API
+app.get('/users/search', async (req, res) => {
+    {
+        const { keyword, type = 'both' } = req.query;
+
+        try {
+            let whereClause = 'WHERE isDeleted = false AND (userId = ? OR nickname = ?)'; 
+            let params = [keyword, keyword];
+    
+            const query = `
+                SELECT 
+                    userId, 
+                    nickname, 
+                    level, 
+                    experience, 
+                    createdAt, 
+                    updatedAt
+                FROM Users
+                ${whereClause}
+            `;
+    
+            const users = await getAllQuery(db, query, params);
+            res.json({ status: 200, data: { users } });
+        } catch (error) {
+            res.status(500).json({ status: 500, message: error.message });
+        }
+    }
+});
+
 // XLSX 파일 데이터 처리 및 검증 함수
 function processXlsxData(workbook) {
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
