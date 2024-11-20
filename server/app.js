@@ -101,6 +101,23 @@ app.get('/users/search', async (req, res) => {
     }
 });
 
+// 사용자 삭제 API
+app.delete('/users/:userId', async (req, res) => {
+    const { userId } = req.params;
+    
+    try {
+
+      await runQuery(db,`
+        UPDATE Users
+        SET isDeleted = true, updatedAt = CURRENT_TIMESTAMP
+        WHERE userId = ?
+      `, [userId])
+      res.json({ status: 200, message: 'User successfully deleted' });
+    } catch (error) {
+      res.status(500).json({ status: 500, message: error.message });
+    }
+  });
+
 // XLSX 파일 데이터 처리 및 검증 함수
 function processXlsxData(workbook) {
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
