@@ -56,7 +56,9 @@ app.get('/rankings', async (req, res) => {
         const totalCount = await getAllQuery(db, `
         SELECT COUNT(*) as count FROM Users WHERE isDeleted = false
       `, []);
-
+        if (rankings.length === 0) {
+            return res.status(404).json({ status: 404, message: '랭킹이 없습니다.' });
+        }
         res.json({
             status: 200,
             data: {
@@ -95,6 +97,10 @@ app.get('/users/search', async (req, res) => {
             `;
 
             const users = await getAllQuery(db, query, params);
+
+            if (users.length === 0) {
+                return res.status(404).json({ status: 404, message: '검색어에 일치하는 유저가 없습니다.' });
+            }
             res.json({ status: 200, data: { users } });
         } catch (error) {
             res.status(500).json({ status: 500, message: error.message });
@@ -107,11 +113,14 @@ app.delete('/users/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
 
-        await runQuery(db, `
+        const result = await runQuery(db, `
         UPDATE Users
         SET isDeleted = true, updatedAt = CURRENT_TIMESTAMP
         WHERE userId = ?
-      `, [userId])
+      `, [userId]);
+        if (result.changes === 0) { // SQLite에서 변화된 행 수 확인
+            return res.status(404).json({ status: 404, message: '변경된 유저가 없습니다.' });
+        }
         res.json({ status: 200, message: 'User successfully deleted' });
     } catch (error) {
         res.status(500).json({ status: 500, message: error.message });
