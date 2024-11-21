@@ -45,9 +45,9 @@ class _SearchPageState extends State<SearchPage> {
         backgroundColor: Colors.black,
       ));
     });
-    // 실제로는 DB에서 삭제하는 API 호출을 여기에 추가
   }
-  @override
+
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('사용자 검색'),        actions: [
@@ -65,7 +65,6 @@ class _SearchPageState extends State<SearchPage> {
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchController,
-              // onChanged: _searchUser,
               onSubmitted: _searchUser,
               decoration: InputDecoration(
                 labelText: 'User ID 또는 닉네임 입력',
@@ -80,19 +79,138 @@ class _SearchPageState extends State<SearchPage> {
           Expanded(
             child: _loading
                 ? Center(child: Text("검색결과가 없습니다"))
-                : ListView.builder(
-                    itemCount: _users.length,
-                    itemBuilder: (context, index) {
-                      final user = _users[index];
-                      return UserTile(
-                        user: user,
-                        onDelete: _deleteUser,
-                      );
+                : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: Table(
+                    border: TableBorder.all(),
+                    columnWidths: {
+                      0: FlexColumnWidth(1), // 랭킹 열, 화면 크기에 비례하여 크기 조정
+                      1: FlexColumnWidth(2), // 레벨 열
+                      2: FlexColumnWidth(2), // 경험치 열
+                      3: FlexColumnWidth(3), // 아이디 열
+                      4: FlexColumnWidth(3), // 닉네임 열
                     },
+                    children: [
+                      // 표 헤더
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200], // 헤더 배경색
+                        ),
+                        children: [
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '랭킹',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '레벨',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '경험치',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '아이디',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '닉네임',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
+                ),
+                // Scrollable Table Body
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Table(
+                      border: TableBorder.all(),
+                      columnWidths: {
+                        0: FlexColumnWidth(1),
+                        1: FlexColumnWidth(2),
+                        2: FlexColumnWidth(2),
+                        3: FlexColumnWidth(3),
+                        4: FlexColumnWidth(3),
+                      },
+                      children: [
+                        // 데이터 행
+                        for (var user in _users) 
+                          TableRow(
+                            children: [
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(user.rank.toString()),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(user.level.toString()),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(user.experience.toString()),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(user.userId),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(user.nickname),
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
+
+ 
 }
