@@ -5,11 +5,16 @@ const sqlite3 = require('sqlite3').verbose();
 const xlsxFilePath = 'artail/server/Users.xlsx';
 const sqliteFilePath = 'artail/server/database.sqlite';
 const path = require('path');
+const cors = require('cors');
 
 // Initialize Express app
 const app = express();
 const port = 3000;
-
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })); //플러터 웹앱전용
 // Set up multer for file upload
 const upload = multer({ dest: 'uploads/' });
 const db = new sqlite3.Database(
