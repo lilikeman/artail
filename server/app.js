@@ -83,24 +83,28 @@ app.get('/rankings', async (req, res) => {
 //키워드 검색API
 app.get('/users/search', async (req, res) => {
     {
-        const { keyword, type = 'both' } = req.query;
+        const { keyword} = req.query;
 
         try {
-            let whereClause = 'WHERE isDeleted = false AND (userId = ? OR nickname = ?)';
             let params = [keyword, keyword];
 
             const query = `
-                SELECT 
-                    userId, 
-                    nickname, 
-                    level, 
-                    experience, 
-                    createdAt, 
-                    updatedAt
-                FROM Users
-                ${whereClause}
-            `;
-
+            SELECT 
+                userId, 
+                nickname, 
+                level, 
+                experience, 
+                createdAt, 
+                updatedAt,
+                (
+                    SELECT COUNT(*) + 1 
+                    FROM Users u2 
+                    WHERE (u2.level > u1.level OR (u2.level = u1.level AND u2.experience > u1.experience))
+                    AND u2.isDeleted = 0
+                ) as rank
+            FROM Users u1
+            WHERE isDeleted = false AND (userId = ? OR nickname = ?)
+        `;
             const users = await getAllQuery(db, query, params);
 
             if (users.length === 0) {
