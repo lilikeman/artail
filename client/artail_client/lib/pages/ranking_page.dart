@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/api_service.dart';
-import '../widgets/user_tile.dart';
 
 class RankingPage extends StatefulWidget {
   @override
@@ -51,19 +50,19 @@ class _RankingPageState extends State<RankingPage> {
     _fetchRanking();
   }
 
-  Future<void> _deleteUser(String userId) async {
-    String message = await _apiService.deleteUsers(userId);
+  Future<void> _deleteUser(User user) async {
+    String message = await _apiService.deleteUsers(user.userId);
     _fetchRanking();
     setState(() {
-      _users.removeWhere((user) => user.userId == userId);
+      _users.remove(user); // _users 리스트에서 해당 유저를 제거
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('$message'),
         backgroundColor: Colors.black,
       ));
     });
-    // 실제로는 DB에서 삭제하는 API 호출을 여기에 추가
   }
-   @override
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -92,6 +91,7 @@ class _RankingPageState extends State<RankingPage> {
                       2: FlexColumnWidth(2), // 경험치 열
                       3: FlexColumnWidth(3), // 아이디 열
                       4: FlexColumnWidth(3), // 닉네임 열
+                      5: FlexColumnWidth(1), // 삭제 버튼 열
                     },
                     children: [
                       // 표 헤더
@@ -145,6 +145,15 @@ class _RankingPageState extends State<RankingPage> {
                               ),
                             ),
                           ),
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '삭제',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -162,10 +171,11 @@ class _RankingPageState extends State<RankingPage> {
                         2: FlexColumnWidth(2),
                         3: FlexColumnWidth(3),
                         4: FlexColumnWidth(3),
+                        5: FlexColumnWidth(1), // 삭제 버튼 열
                       },
                       children: [
                         // 데이터 행
-                        for (var user in _users) 
+                        for (var user in _users)
                           TableRow(
                             children: [
                               TableCell(
@@ -198,6 +208,15 @@ class _RankingPageState extends State<RankingPage> {
                                   child: Text(user.nickname),
                                 ),
                               ),
+                              TableCell(
+                                child: IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    // 삭제할 유저를 정확히 전달
+                                    _deleteUser(user);
+                                  },
+                                ),
+                              ),
                             ],
                           ),
                       ],
@@ -227,5 +246,4 @@ class _RankingPageState extends State<RankingPage> {
             ),
     );
   }
- 
 }

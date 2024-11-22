@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
-import '../widgets/user_tile.dart';
 import '../services/api_service.dart';
 
 class SearchPage extends StatefulWidget {
@@ -36,10 +35,10 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  Future<void> _deleteUser(String userId) async {
-    String message = await _apiService.deleteUsers(userId);
+  Future<void> _deleteUser(User user) async {
+    String message = await _apiService.deleteUsers(user.userId);
     setState(() {
-      _users.removeWhere((user) => user.userId == userId);
+      _users.remove(user); // _users 리스트에서 해당 유저를 제거
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('$message'),
         backgroundColor: Colors.black,
@@ -47,10 +46,12 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('사용자 검색'),        actions: [
+      appBar: AppBar(
+        title: Text('사용자 검색'),
+        actions: [
           IconButton(
             icon: Icon(Icons.leaderboard),
             onPressed: () {
@@ -58,7 +59,8 @@ class _SearchPageState extends State<SearchPage> {
               Navigator.popAndPushNamed(context, '/ranking');
             },
           ),
-        ],),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
@@ -69,10 +71,9 @@ class _SearchPageState extends State<SearchPage> {
               decoration: InputDecoration(
                 labelText: 'User ID 또는 닉네임 입력',
                 suffixIcon: IconButton(
-                  icon : Icon(Icons.search),
-                  onPressed: ()=>_searchUser(_searchController.text),
-                )
-                ,
+                  icon: Icon(Icons.search),
+                  onPressed: () => _searchUser(_searchController.text),
+                ),
               ),
             ),
           ),
@@ -80,137 +81,161 @@ class _SearchPageState extends State<SearchPage> {
             child: _loading
                 ? Center(child: Text("검색결과가 없습니다"))
                 : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: Table(
-                    border: TableBorder.all(),
-                    columnWidths: {
-                      0: FlexColumnWidth(1), // 랭킹 열, 화면 크기에 비례하여 크기 조정
-                      1: FlexColumnWidth(2), // 레벨 열
-                      2: FlexColumnWidth(2), // 경험치 열
-                      3: FlexColumnWidth(3), // 아이디 열
-                      4: FlexColumnWidth(3), // 닉네임 열
-                    },
                     children: [
-                      // 표 헤더
-                      TableRow(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200], // 헤더 배경색
+                      Padding(
+                        padding: const EdgeInsets.all(0.0),
+                        child: Table(
+                          border: TableBorder.all(),
+                          columnWidths: {
+                            0: FlexColumnWidth(1), // 랭킹 열, 화면 크기에 비례하여 크기 조정
+                            1: FlexColumnWidth(2), // 레벨 열
+                            2: FlexColumnWidth(2), // 경험치 열
+                            3: FlexColumnWidth(3), // 아이디 열
+                            4: FlexColumnWidth(3), // 닉네임 열
+                            5: FlexColumnWidth(1), // 삭제 버튼 열
+                          },
+                          children: [
+                            // 표 헤더
+                            TableRow(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200], // 헤더 배경색
+                              ),
+                              children: [
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      '랭킹',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      '레벨',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      '경험치',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      '아이디',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      '닉네임',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      '삭제',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        children: [
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                '랭킹',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
+                      ),
+                      // Scrollable Table Body
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Table(
+                            border: TableBorder.all(),
+                            columnWidths: {
+                              0: FlexColumnWidth(1),
+                              1: FlexColumnWidth(2),
+                              2: FlexColumnWidth(2),
+                              3: FlexColumnWidth(3),
+                              4: FlexColumnWidth(3),
+                              5: FlexColumnWidth(1), // 삭제 버튼 열
+                            },
+                            children: [
+                              // 데이터 행
+                              for (var user in _users)
+                                TableRow(
+                                  children: [
+                                    TableCell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(user.rank.toString()),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(user.level.toString()),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(user.experience.toString()),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(user.userId),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(user.nickname),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: IconButton(
+                                        icon: Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () {
+                                          // 삭제할 유저를 정확히 전달
+                                          _deleteUser(user);
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
                           ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                '레벨',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                '경험치',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                '아이디',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                '닉네임',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
-                ),
-                // Scrollable Table Body
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Table(
-                      border: TableBorder.all(),
-                      columnWidths: {
-                        0: FlexColumnWidth(1),
-                        1: FlexColumnWidth(2),
-                        2: FlexColumnWidth(2),
-                        3: FlexColumnWidth(3),
-                        4: FlexColumnWidth(3),
-                      },
-                      children: [
-                        // 데이터 행
-                        for (var user in _users) 
-                          TableRow(
-                            children: [
-                              TableCell(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(user.rank.toString()),
-                                ),
-                              ),
-                              TableCell(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(user.level.toString()),
-                                ),
-                              ),
-                              TableCell(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(user.experience.toString()),
-                                ),
-                              ),
-                              TableCell(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(user.userId),
-                                ),
-                              ),
-                              TableCell(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(user.nickname),
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
   }
-
-
- 
 }
