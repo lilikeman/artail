@@ -1,4 +1,3 @@
-// import fetch from 'node-fetch'; // node-fetch 사용
 const HTTP_METHOD_GET = "GET";
 const HTTP_METHOD_POST = "POST";
 const HTTP_METHOD_PUT = "PUT";
@@ -9,7 +8,8 @@ export const lambdaHandler = async (event, context) => {
   const { path, httpMethod, queryStringParameters } = event;
   // HTTP 서버 URL (클라이언트 -> 미들웨어 -> HTTP 서버)
   try {
-    if (path.startsWith('/users')) {      
+    if (path.startsWith('/users')) {
+      // 사용자검색
       if (path === '/users/search' && httpMethod === HTTP_METHOD_GET) {
         const response = await fetch(`http://15.165.170.112:3000/users/search` + `?keyword=${queryStringParameters.keyword}`, {
           method: 'GET',
@@ -30,6 +30,7 @@ export const lambdaHandler = async (event, context) => {
             data: responseData,
           }),
         };
+        // 사용자 삭제
       } else if (path === '/users' && httpMethod === HTTP_METHOD_DELETE) {
         const userId = queryStringParameters.userId;
         console.log("delete invoked");
@@ -58,6 +59,7 @@ export const lambdaHandler = async (event, context) => {
           }),
         };
       }
+      //랭킹조회
     } else if (path.startsWith('/rankings')) {
 
       const response = await fetch(`http://15.165.170.112:3000/rankings` + `?page=${queryStringParameters.page}`, {
