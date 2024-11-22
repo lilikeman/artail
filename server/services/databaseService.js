@@ -1,13 +1,27 @@
 const sqlite3 = require('sqlite3');
-const sqliteFilePath = 'artail/server/database.sqlite';
+const sqliteFilePath = '/home/ec2-user/dev/artail/server/database.sqlite';
+const xlsxFilePath = '/home/ec2-user/dev/artail/server/Users.xlsx';
+const xlsx = require('xlsx');
+const { processXlsxData } = require('./xlsxService')
+const { getAllQuery, runQuery } = require('../utils/dbUtils');
 
+
+// author : 김현수
+// edit date : 2024-11-22
+// last editor : 김현수
+// 데이터베이스 객체생성
 const db = new sqlite3.Database(
     sqliteFilePath,
     sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
     (err) => {
     }
 );
-// initializeDatabase 함수 추가
+
+
+// author : 김현수
+// edit date : 2024-11-22
+// last editor : 김현수
+// 데이터베이스 작성(초기화)
 async function initializeDatabase() {
     await runQuery(db, 'PRAGMA foreign_keys = ON');
 
