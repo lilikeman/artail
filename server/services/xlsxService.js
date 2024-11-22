@@ -1,5 +1,11 @@
 const xlsx = require('xlsx');
 
+
+// author : 김현수
+// edit date : 2024-11-22
+// last editor : 김현수
+// 액셀파일 읽어오기
+// 주의 userId, nicknam, level, exp(경험치)가 있어야함
 function processXlsxData(workbook) {
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(firstSheet);
