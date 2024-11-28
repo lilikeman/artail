@@ -16,7 +16,8 @@ exports.searchUsers = async (req, res) => {
                 userId, 
                 nickname, 
                 level, 
-                experience, 
+                experience,
+                balance, 
                 createdAt, 
                 updatedAt,
                 (

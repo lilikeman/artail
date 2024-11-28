@@ -19,7 +19,7 @@ const db = new sqlite3.Database(
 
 
 // author : 김현수
-// edit date : 2024-11-22
+// edit date : 2024-11-28
 // last editor : 김현수
 // 데이터베이스 작성(초기화)
 async function initializeDatabase() {
@@ -32,6 +32,7 @@ async function initializeDatabase() {
             nickname VARCHAR(100) NOT NULL,
             level INTEGER NOT NULL DEFAULT 1,
             experience BIGINT NOT NULL DEFAULT 0,
+            balance BIGINT NOT NULL DEFAULT 0,
             createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             isDeleted BOOLEAN NOT NULL DEFAULT 0,
@@ -86,7 +87,8 @@ async function initializeDatabase() {
                 userId, 
                 nickname, 
                 level, 
-                experience, 
+                experience,
+                balance, 
                 createdAt, 
                 updatedAt, 
                 isDeleted
@@ -104,6 +106,7 @@ async function initializeDatabase() {
                 user.nickname, // nickname 충돌 무시
                 user.level,
                 user.experience,
+                user.balance,
                 user.createdAt,
                 user.updatedAt,
                 user.isDeleted,

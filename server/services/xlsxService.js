@@ -2,10 +2,10 @@ const xlsx = require('xlsx');
 
 
 // author : 김현수
-// edit date : 2024-11-22
+// edit date : 2024-11-28
 // last editor : 김현수
 // 액셀파일 읽어오기
-// 주의 userId, nicknam, level, exp(경험치)가 있어야함
+// 주의 userId, nicknam, level, exp(경험치), balance가 있어야함
 function processXlsxData(workbook) {
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(firstSheet);
@@ -20,6 +20,7 @@ function processXlsxData(workbook) {
             nickname: String(row.nickname),
             level: parseInt(row.level),
             experience: parseInt(row.exp),
+            balance : parseInt(row.balance),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             isDeleted: false
