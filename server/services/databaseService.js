@@ -44,7 +44,7 @@ async function initializeDatabase() {
     // items 테이블 생성
     await runQuery(db, `
        CREATE TABLE IF NOT EXISTS Items (
-            itemId INTEGER PRIMARY KEY AUTOINCREMENT,
+            itemId TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))), 
             name VARCHAR(100) NOT NULL,
             price REAL NOT NULL,
             sellerId VARCHAR(16) NOT NULL,
@@ -104,10 +104,6 @@ async function initializeDatabase() {
                 updatedAt, 
                 isDeleted
             ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(userId) DO UPDATE SET
-                level = excluded.level,
-                experience = excluded.experience,
-                updatedAt = excluded.updatedAt
         `;
 
         // 데이터 삽입
