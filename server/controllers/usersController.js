@@ -114,16 +114,21 @@ exports.searchAuctionHistory = async (req, res) => {
         `;
 
         // 유저 정보 조회 쿼리 실행
-        const users = await getAllQuery(db, query, params);
+        let users = await getAllQuery(db, query, params);
 
         // 유저가 없다면 결과 메시지전달
         if (users.length === 0) {
             return res.json({
                 status: 404,
-                message : "검색어에 일치하는 유저가 없습니다."
+                message: "검색어에 일치하는 유저가 없습니다."
             });
         }
 
+        // items 필드를 JSON 포맷으로 변환
+        users = users.map(user => ({
+            ...user,
+            items: JSON.parse(user.items)
+        }));
         // 응답 전송
         res.json({
             status: 200,
@@ -133,6 +138,6 @@ exports.searchAuctionHistory = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ status : 500 , message: 'Internal server error' });
     }
 };
