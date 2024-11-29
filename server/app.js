@@ -20,15 +20,23 @@ app.options('*', (req, res) => {
 // 라우터 등록
 const rankingsRoutes = require('./routes/rankingsRoutes');
 const usersRoutes = require('./routes/usersRoutes');
-
+const itemsRoutes = require('./routes/itemsRoutes');
+const purchseRoutes = require('./routes/purchaseRoutes');
+const salesRoutes = require('./routes/salesRoutes');
 //prefilight 관련
 app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   next();
 });
 
+
+app.use(express.json()); //body 파싱관련
+
 app.use('/rankings', rankingsRoutes);
 app.use('/users', usersRoutes);
+app.use('/items',itemsRoutes);
+app.use('/purchase',purchseRoutes);
+app.use('/sales',salesRoutes);
 
 //서버 데이터 베이스 초기화
 app.get('/', async (req, res) => {
