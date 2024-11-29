@@ -69,3 +69,70 @@ exports.deleteUser = async (req, res) => {
         res.status(500).json({ status: 500, message: error.message });
     }
 };
+
+
+// author : 김현수
+// edit date : 2024-11-29
+// last editor : 김현수
+// 거래소 계정 정보 조회
+// Desc: userId를 입력하여 해당아이디의 경매장에 등록한 아이템의 상태를 조회, 대상 : available(구매가능), sold(팔림), pending(대기)
+// TODO: 1)인벤토리개념을 도입하여 연동
+exports.searchAuctionHistory = async (req, res) => {
+    const { userId } = req.query;
+
+    try {
+        const params = [userId];
+        const query = `
+            SELECT 
+                u.userId, 
+                u.nickname, 
+                u.balance,
+                u.createdAt, 
+                u.updatedAt,
+                COALESCE(
+                    json_group_array(
+                        CASE 
+                            WHEN i.status IN ('available', 'sold', 'pending') THEN
+                                json_object(
+                                    'itemId', i.itemId,
+                                    'name', i.name,
+                                    'price', i.price,
+                                    'status', i.status
+                                )
+                        END
+                    ), '[]'
+                ) AS items
+            FROM 
+                Users u
+            LEFT JOIN 
+                Items i ON u.userId = i.sellerId
+            WHERE 
+                u.isDeleted = false 
+                AND u.userId = ?
+            GROUP BY 
+                u.userId
+        `;
+
+        // 유저 정보 조회 쿼리 실행
+        const users = await getAllQuery(db, query, params);
+
+        // 유저가 없다면 결과 메시지전달
+        if (users.length === 0) {
+            return res.json({
+                status: 404,
+                message : "검색어에 일치하는 유저가 없습니다."
+            });
+        }
+
+        // 응답 전송
+        res.json({
+            status: 200,
+            data: {
+                users: users
+            }
+        });
+
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};

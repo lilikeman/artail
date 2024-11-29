@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { searchUsers, deleteUser } = require('../controllers/usersController');
+const { searchUsers, deleteUser ,searchAuctionHistory} = require('../controllers/usersController');
 
 router.get('/search', searchUsers);
+router.get('/auction', searchAuctionHistory);
 router.delete('/:userId', deleteUser);
 
 module.exports = router;
