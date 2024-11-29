@@ -103,7 +103,7 @@ async function initializeDatabase() {
                 createdAt, 
                 updatedAt, 
                 isDeleted
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?,?)
         `;
 
         // 데이터 삽입
