@@ -41,6 +41,17 @@ async function initializeDatabase() {
         )
     `);
 
+    // items 테이블 생성
+    await runQuery(db, `
+       CREATE TABLE IF NOT EXISTS Items (
+            itemId INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(100) NOT NULL,
+            price REAL NOT NULL,
+            sellerId VARCHAR(16) NOT NULL,
+            status VARCHAR(16) NOT NULL,
+            FOREIGN KEY (sellerId) REFERENCES Users (userId)
+        )
+    `);
     // 인덱스 생성
     await runQuery(db, `
         CREATE INDEX IF NOT EXISTS idx_user_ranking 
